@@ -7,7 +7,7 @@
 | Milestone | Description | Status | Notes |
 | --- | --- | --- | --- |
 | M1: Foundation | リポ構築、仕様ドキュメント、Python/TS 実装、CI/サーバレス雛形 | **Done** | GitHub `score-function` に初期コミット済み |
-| M2: Metrics Automation | ESLint/Jest/pytest/Syft/Semgrep/Stryker からの実データ連携 | **Todo** | `tools/collect_metrics.py` を各プロジェクトに合わせて拡張 |
+| M2: Metrics Automation | ESLint/Jest/pytest/Syft/Semgrep/Stryker からの実データ連携 | **Done** | `tools/collect_metrics.py` で標準 JSON を自動正規化 |
 | M3: Validation & QA | テストデータ拡充、単体テスト/型チェック/CI 強化 | **Todo** | CLI/API のリグレッションテスト、tsc 実行など |
 | M4: Deployment | Vercel Edge / Cloudflare Workers / 任意 API へのデプロイと監視 | **Todo** | 各環境用の自動デプロイフローを準備 |
 | M5: Adoption | 他チーム/AI への導入、ドキュメント整備、Ops ノート更新 | **Todo** | 運用指標や FAQ を README/Docs に追加 |
@@ -25,7 +25,7 @@
 | T-07 | Serverless | Vercel Edge `api/score-function/route.ts` | Done | 完了 |
 | T-08 | Workers | Cloudflare `workers/score-function.ts` | Done | 完了 |
 | T-09 | CI Gate | `.github/workflows/score-function.yml` | Done | 完了 |
-| T-10 | Metrics Integration | CI で ESLint/Jest/pytest/Syft/Semgrep/Stryker から実値取得 | Todo | 各プロジェクトのレポート形式に対応させる |
+| T-10 | Metrics Integration | CI で ESLint/Jest/pytest/Syft/Semgrep/Stryker から実値取得 | Done | `tools/collect_metrics.py` が標準 JSON を集約 |
 | T-11 | Testing | Python/TS 版の単体テスト・tsc 実行・型検査 | Todo | `pytest`／`tsc --noEmit` など |
 | T-12 | Packaging | PyPI/ npm などでの配布検討 | Todo | 任意 |
 | T-13 | Deployment | Vercel/Workers へ本番デプロイ＆監視設定 | Todo | Secrets, deploy scripts 作成 |
@@ -34,8 +34,6 @@
 
 ## Next Actions
 
-1. **T-10**: 実際の ESLint/Jest/pytest/Syft/Semgrep/Stryker の出力ファイル形式を確認して `tools/collect_metrics.py` を拡張し、`reports/` 以下から本番値を生成できるようにする。  
-2. **T-11**: Python 版へ最小限の単体テスト (`pytest`) を追加し、TypeScript 版は `tsc` で型チェック、CI に組み込む。  
-3. **T-13**: 想定デプロイ先 (例: Vercel/Cloudflare) を決め、GitHub Actions からデプロイできるよう Secrets とワークフローを整備。  
-4. **T-15**: 利用ガイド／プロファイル調整方法／メトリクス正規化例を Docs 化して他チームが自走できるようにする。
-
+1. **T-11**: Python 版へ最小限の単体テスト (`pytest`) を追加し、TypeScript 版は `tsc` で型チェック、CI に組み込む。  
+2. **T-13**: 想定デプロイ先 (例: Vercel/Cloudflare) を決め、GitHub Actions からデプロイできるよう Secrets とワークフローを整備。  
+3. **T-15**: 利用ガイド／プロファイル調整方法／メトリクス正規化例を Docs 化して他チームが自走できるようにする。

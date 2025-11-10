@@ -39,7 +39,16 @@ workers/score-function.ts    # Cloudflare Workers エントリ
 
 ### 1. メトリクスの収集
 
-`tools/collect_metrics.py` はレポート(JSON)を読み取り `metrics.json` を生成する雛形です。ESLint/Jest/pytest/Syft/Semgrep/Stryker の標準出力 (もしくは JSON レポート) を `reports/` 以下に配置し、必要な変換ロジックを埋めてください。
+`tools/collect_metrics.py` は ESLint / Jest coverage / pytest json-report / Syft / Semgrep / Stryker の JSON を取り込み、Score Function の 0–1 指標へ正規化します。デフォルトでは `reports/` 配下の次ファイルを読みます:
+
+- `eslint.json` (`eslint -f json`)
+- `coverage-summary.json` (`jest --coverage --coverageReporters=json-summary`)
+- `pytest-report.json` (`pytest --json-report`)
+- `stryker-report.json` (`stryker run --reporters json`)
+- `semgrep.json` (`semgrep --json`)
+- `syft.json` (`syft scan --output json`)
+
+カスタムパスは `--eslint` などの引数、もしくは `--reports-dir` でルートを指定してください。`--strict` を付けると未検出レポートで即エラーになります。
 
 ```bash
 python tools/collect_metrics.py > metrics.json
