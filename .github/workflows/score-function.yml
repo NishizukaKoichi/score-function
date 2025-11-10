@@ -10,6 +10,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Python tests
+        shell: bash
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          pip install -r requirements-dev.txt
+          pytest
+
+      - name: TypeScript build
+        run: |
+          npm install
+          npm run build
+
       - name: Prepare metrics
         run: |
           python tools/collect_metrics.py > metrics.json

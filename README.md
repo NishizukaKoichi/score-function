@@ -86,6 +86,20 @@ const result = scoreFunction(DEFAULT_CONFIG, metrics);
 
 `.github/workflows/score-function.yml` を参照してください。`collect_metrics.py` → `score_function.py` → ゲート判定の 3 ステップで PR をブロックできます。
 
+### 5. テスト / 型チェック
+
+```bash
+# Python (pytest)
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements-dev.txt
+pytest
+
+# TypeScript (tsc)
+npm install
+npm run build
+```
+
 ## 入出力スキーマ
 
 - Config: `score-function.yml`
