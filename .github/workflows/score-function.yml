@@ -1,0 +1,29 @@
+name: Score Function
+
+on:
+  pull_request:
+    branches: ["*"]
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare metrics
+        run: |
+          python tools/collect_metrics.py > metrics.json
+
+      - name: Compute Score Function
+        run: |
+          python tools/score_function.py score-function.yml metrics.json | tee out.json
+
+      - name: Gate PR
+        run: |
+          python - <<'PY'
+          import json
+          data = json.load(open('out.json'))
+          print('Score Function faces:', data['faces'])
+          print('Score Function final:', data['final'])
+          assert data['gate_ok'], 'Score Function gate blocked'
+          PY

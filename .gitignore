@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+reports/
+metrics.json
+out.json
+node_modules/
+.DS_Store

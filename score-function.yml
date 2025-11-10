@@ -1,0 +1,27 @@
+version: 1
+profile: "sre"
+k_steep: 14
+
+gate:
+  min_each: 70
+  min_geo: 80
+  floor_each: 5
+
+external_weights:
+  sre:   { spec: 1.0, code: 1.0, test: 1.0, sec: 1.2, pr: 1.0, dep: 1.2 }
+  speed: { spec: 1.15, code: 1.15, test: 1.15, sec: 0.9, pr: 1.15, dep: 0.9 }
+
+thresholds:
+  spec: { ambig_tau: 0.6, conflict_tau: 0.6 }
+  code: { cc_tau: 0.7 }
+  test: { low_mt_tau: 0.6, low_cv_tau: 0.7 }
+  pr:   { risk_tau: 0.7 }
+  dep:  { perf_reg_tau: 0.6, cfr_tau: 0.5 }
+
+weights:
+  spec: { RC: 0.30, TR: 0.25, AM_inv: 0.20, CN_inv: 0.15, EX: 0.10 }
+  code: { SA: 0.28, CC_inv: 0.20, DP_inv: 0.12, DE: 0.18, DT: 0.12, PF: 0.10 }
+  test: { CV: 0.32, MT: 0.32, FL_inv: 0.16, SK_inv: 0.10, ST: 0.10 }
+  sec:  { VV: 0.34, SE: 0.20, DPV_inv: 0.16, AT: 0.20, ML: 0.10 }
+  pr:   { RR: 0.28, RK_inv: 0.22, DV: 0.18, RB_inv: 0.12, CI: 0.20 }
+  dep:  { SR: 0.22, CFR_inv: 0.22, MT_inv: 0.18, RBK_inv: 0.12, PRG_inv: 0.16, EB_inv: 0.10 }
