@@ -100,6 +100,22 @@ npm install
 npm run build
 ```
 
+### 6. デプロイ (Vercel / Cloudflare)
+
+- **Vercel Edge**：`vercel.json` と `api/score-function/route.ts` を対象に `Deploy Vercel Edge` ワークフローが `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` の GitHub Secrets を使って `npx vercel deploy --prod` を実行します。手動 `workflow_dispatch` か main への push で起動可能です。
+- **Cloudflare Workers**：`wrangler.toml` + `workers/score-function.ts` を `Deploy Cloudflare Worker` ワークフローが `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` を用いて `wrangler publish` します。
+- ローカルでの手動デプロイ例:
+
+```bash
+# Vercel
+npm install && npm run build
+VERCEL_TOKEN=... npx vercel deploy --prod
+
+# Cloudflare
+npm install && npm run build
+npx wrangler publish
+```
+
 ## 入出力スキーマ
 
 - Config: `score-function.yml`
