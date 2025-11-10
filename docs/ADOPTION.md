@@ -9,7 +9,7 @@
    - Python: `python -m venv .venv && source .venv/bin/activate && pip install -r requirements-dev.txt`
    - Node: `npm install`
 3. メトリクス収集: `python tools/collect_metrics.py --reports-dir reports > metrics.json`
-4. スコア算出: `python tools/score_function.py score-function.yml metrics.json`
+4. スコア算出: `python -m score_function score-function.yml metrics.json`
 5. CI ゲート: `.github/workflows/score-function.yml` をコピーし、レポート生成ステップを自分の lint/test/sast/scan スクリプトに置き換える。
 
 ## 2. プロファイル調整
@@ -47,7 +47,12 @@ Score Function は 0–1 の入力を想定しているため、各指標を min
 
 CI では `collect_metrics.py` までを 1 ステップにまとめ、Score Function CLI→ゲート判定までを一気に流すとシンプルです。
 
-## 5. API / サーバレス導入
+## 5. パッケージ配布
+
+- **Python**: `pip install .` または `pip install score-function`（PyPI 公開後）でモジュール＋CLI を利用できます。CLI は `score-function` コマンドか `python -m score_function`。
+- **npm**: `npm publish` された `score-function` パッケージを `import { scoreFunction } from "score-function";` で利用。`prepublishOnly` が `npm run build` を呼ぶためビルド後の dist が配布されます。
+
+## 6. API / サーバレス導入
 
 ### Vercel Edge
 1. `vercel.json` と `api/score-function/route.ts` をリポに含める。
@@ -61,15 +66,18 @@ CI では `collect_metrics.py` までを 1 ステップにまとめ、Score Func
 3. `Deploy Cloudflare Worker` ワークフローが `wrangler publish` を呼び出して更新。
 4. エッジロケーションで `scoreFunction` を呼び出せる API が完成。
 
-## 6. 運用ノート
+## 7. 運用ノート
 
 - **ゲート条件**: `min(face) >= 70` かつ 幾何平均 `>= 80`。どちらかを割るとゲート NG。必要なら `score-function.yml` の `gate` セクションで閾値を調整。
 - **不確実性**: `uncertainty_sigma` は 0–1 の範囲。信頼できない指標が多い場合は 0.2 以上に引き上げ、最終スコアを安全側にバイアス。
 - **学習サイクル**: 週次/スプリント単位で各重み・閾値をベイズ最適化やマルチアームバンディットで更新し、SLO 達成度を目的関数にします。
 - **AI 連携**: LLM/エージェントから呼び出す場合、metrics.json を生成して API or CLI を実行するだけでスコアリング可能。インサイトを返すために `faces` / `weighted_faces` の内訳を可視化すると理解が進みます。
 
-## 7. ハンドオーバー
+## 8. オブザーバビリティ
+
+`docs/OBSERVABILITY.md` にログストリーム／メトリクス化／アラート例をまとめています。Vercel/Cloudflare の Logpush を使い、`score-function` ログから `final/gate_ok` を可視化してください。
+
+## 9. ハンドオーバー
 
 - 進捗/タスクは `PROGRESS.md` に記載。
 - 次の保守担当は T-15 以降のチケット状況を確認し、必要に応じて新規チケットを追記してください。
-

@@ -14,6 +14,15 @@ export async function POST(req: Request): Promise<Response> {
       });
     }
     const result = scoreFunction(config, metrics);
+    console.log(
+      JSON.stringify({
+        label: "score-function",
+        profile: result.profile,
+        final: result.final,
+        geo: result.geo,
+        gate_ok: result.gate_ok,
+      }),
+    );
     return new Response(JSON.stringify(result), {
       headers: { "content-type": "application/json" },
     });

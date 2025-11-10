@@ -29,7 +29,7 @@ jobs:
 
       - name: Compute Score Function
         run: |
-          python tools/score_function.py score-function.yml metrics.json | tee out.json
+          python -m score_function score-function.yml metrics.json | tee out.json
 
       - name: Gate PR
         run: |

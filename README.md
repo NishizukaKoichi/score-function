@@ -28,10 +28,13 @@ README.md                    # このファイル
 LICENSE                      # CC0 1.0 Universal
 score-function.yml           # 配布用コンフィグ (profile="sre")
 examples/metrics.sample.json
+score_function/
+  __init__.py                # Python ライブラリ & CLI エントリ
+  __main__.py
+  py.typed
 tools/
-  score_function.py          # 依存ゼロの Python CLI/関数
-  score_function.ts          # TypeScript 版 (Node/Edge/Workers 共通)
   collect_metrics.py         # ESLint/Jest/pytest/Syft/Semgrep/Stryker の雛形集約
+  score_function.ts          # TypeScript 版 (Node/Edge/Workers 共通)
 api/score-function/route.ts  # Vercel Edge Function エントリ
 workers/score-function.ts    # Cloudflare Workers エントリ
 .github/workflows/score-function.yml # CI 例 (PR ゲート)
@@ -59,7 +62,7 @@ python tools/collect_metrics.py > metrics.json
 ### 2. スコアの算出 (Python)
 
 ```bash
-python tools/score_function.py score-function.yml metrics.json
+python -m score_function score-function.yml metrics.json
 ```
 
 標準出力:
@@ -86,7 +89,7 @@ const result = scoreFunction(DEFAULT_CONFIG, metrics);
 
 ### 4. CI への組み込み
 
-`.github/workflows/score-function.yml` を参照してください。`collect_metrics.py` → `score_function.py` → ゲート判定の 3 ステップで PR をブロックできます。
+`.github/workflows/score-function.yml` を参照してください。`collect_metrics.py` → `python -m score_function` → ゲート判定の 3 ステップで PR をブロックできます。
 
 ### 5. テスト / 型チェック
 
@@ -117,6 +120,15 @@ VERCEL_TOKEN=... npx vercel deploy --prod
 npm install && npm run build
 npx wrangler publish
 ```
+
+# 7. 配布
+
+- **Python**: `pyproject.toml` を同梱しているため `pip install .` でローカルインストールできます。CLI は `python -m score_function ...` もしくは `score-function` エントリポイントで利用可能です。`python -m build` で sdist/wheel を生成して PyPI に公開できます。
+- **TypeScript / npm**: `npm publish` で `dist/tools/score_function.{js,d.ts}` を配布できます。`prepublishOnly` が `npm run build` を呼ぶので、`npm version` → `npm publish` のフローで自動的に型定義付きバンドルを配布できます。
+
+# 8. オブザーバビリティ
+
+`docs/OBSERVABILITY.md` にログ収集・メトリクス化・アラート設計のベストプラクティスをまとめています。Vercel Edge / Cloudflare Workers では `score-function` ラベルの JSON ログを出力しているので、Logpush/BigQuery 等に送ってダッシュボード化してください。
 
 ## 入出力スキーマ
 

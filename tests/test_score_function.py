@@ -7,7 +7,7 @@ import pytest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.append(str(ROOT))
 
-from tools.score_function import score_function, load_config, load_json  # noqa: E402
+from score_function import score_function, load_config, load_json  # noqa: E402
 
 CONFIG = load_config(Path("score-function.yml"))
 SAMPLE = load_json(Path("examples/metrics.sample.json"))
