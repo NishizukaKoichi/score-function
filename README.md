@@ -1,10 +1,8 @@
-# Score Function (v1.3)
+# Score Function
 
 Score Function は、仕様適合度・コード品質・テスト体制・セキュリティ・PR 運用・デプロイ体制の 6 つの面をスコアリングし、幾何平均＋不確実性控除で 0–100 の最終指標を返します。本リポジトリは CC0 (Public Domain) で配布され、式・設定・入出力例・実装・API・CI を一括で参照できます。
 
 > Security の符号修正 / クリティカル特例 / k=14 / 幾何平均前フロア=5 を反映済み。
-
-詳細な導入手順・正規化・プロファイル調整は `docs/ADOPTION.md` を参照してください。
 
 ## 数式サマリ
 
@@ -34,10 +32,7 @@ score_function/
   py.typed
 tools/
   collect_metrics.py         # ESLint/Jest/pytest/Syft/Semgrep/Stryker の雛形集約
-  score_function.ts          # TypeScript 版 (Node/Edge/Workers 共通)
-api/score-function/route.ts  # Vercel Edge Function エントリ
-workers/score-function.ts    # Cloudflare Workers エントリ
-.github/workflows/score-function.yml # CI 例 (PR ゲート)
+  score_function.ts          # TypeScript 版（Node/自前サーバレス向け）
 ```
 
 ## 使い方
@@ -84,12 +79,11 @@ import { scoreFunction, DEFAULT_CONFIG } from "./tools/score_function";
 const result = scoreFunction(DEFAULT_CONFIG, metrics);
 ```
 
-- Vercel Edge: `api/score-function/route.ts`
-- Cloudflare Workers: `workers/score-function.ts`
+- HTTP API で公開する場合は自前のアプリ／サーバレス環境からこのモジュールを呼び出してください（以前の Vercel / Cloudflare 向けサンプルは撤去済み）。
 
 ### 4. CI への組み込み
 
-`.github/workflows/score-function.yml` を参照してください。`collect_metrics.py` → `python -m score_function` → ゲート判定の 3 ステップで PR をブロックできます。
+CI では `collect_metrics.py` → `python -m score_function` → ゲート判定の 3 ステップを 1 ジョブにまとめて実行してください。GitHub Actions 例は撤去したので、各自の CI/CD（GitHub Actions, CircleCI, Jenkins など）で相当のステップを用意してください。
 
 ### 5. テスト / 型チェック
 
@@ -105,30 +99,16 @@ npm install
 npm run build
 ```
 
-### 6. デプロイ (Vercel / Cloudflare)
+### 6. ランタイム / 配布のヒント
 
-- **Vercel Edge**：`vercel.json` と `api/score-function/route.ts` を対象に `Deploy Vercel Edge` ワークフローが `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` の GitHub Secrets を使って `npx vercel deploy --prod` を実行します。手動 `workflow_dispatch` か main への push で起動可能です。
-- **Cloudflare Workers**：`wrangler.toml` + `workers/score-function.ts` を `Deploy Cloudflare Worker` ワークフローが `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID` を用いて `wrangler publish` します。
-- ローカルでの手動デプロイ例:
+- **Python**: `pip install .` でローカル利用できます。CLI は `python -m score_function ...` あるいは `score-function` で実行し、`python -m build` で PyPI 配布用パッケージを生成できます。
+- **TypeScript / npm**: `npm run build` で `dist/tools/score_function.{js,d.ts}` を出力し、そのまま `npm publish` で公開できます（`prepublishOnly` が `tsc` を実行）。
+- **任意基盤への組み込み**: API / バッチ / CLI など任意の実行環境からライブラリ関数を呼ぶだけで完結します。Python 例: `python -m score_function score-function.yml metrics.json`。TypeScript 例: `node dist/tools/score_function.js metrics.json`。
 
-```bash
-# Vercel
-npm install && npm run build
-VERCEL_TOKEN=... npx vercel deploy --prod
+## ログと可視化
 
-# Cloudflare
-npm install && npm run build
-npx wrangler publish
-```
-
-# 7. 配布
-
-- **Python**: `pyproject.toml` を同梱しているため `pip install .` でローカルインストールできます。CLI は `python -m score_function ...` もしくは `score-function` エントリポイントで利用可能です。`python -m build` で sdist/wheel を生成して PyPI に公開できます。
-- **TypeScript / npm**: `npm publish` で `dist/tools/score_function.{js,d.ts}` を配布できます。`prepublishOnly` が `npm run build` を呼ぶので、`npm version` → `npm publish` のフローで自動的に型定義付きバンドルを配布できます。
-
-# 8. オブザーバビリティ
-
-`docs/OBSERVABILITY.md` にログ収集・メトリクス化・アラート設計のベストプラクティスをまとめています。Vercel Edge / Cloudflare Workers では `score-function` ラベルの JSON ログを出力しているので、Logpush/BigQuery 等に送ってダッシュボード化してください。
+- 出力 JSON 全体（特に `faces`, `final`, `gate_ok`）をそのままログ収集基盤に送れば、BI やモニタリングから参照できます。
+- `gate_ok == false` を通知し、`final` の時系列を可視化しておくと品質リグレッションの検知が容易です。
 
 ## 入出力スキーマ
 
