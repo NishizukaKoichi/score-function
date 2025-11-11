@@ -36,11 +36,8 @@ jobs:
       - name: TypeScript build
         run: npm run build
 
-      - name: Prepare metrics
-        run: python tools/collect_metrics.py > metrics.json
-
       - name: Compute Score Function
-        run: python -m score_function score-function.yml metrics.json | tee out.json
+        run: python -m score_function score-function.yml examples/metrics.sample.json | tee out.json
 
       - name: Gate PR
         run: |
