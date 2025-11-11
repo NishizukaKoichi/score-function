@@ -1,6 +1,8 @@
 name: Score Function
 
 on:
+  push:
+    branches: ["main"]
   pull_request:
     branches: ["*"]
 
@@ -10,26 +12,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Python tests
-        shell: bash
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Python dependencies
         run: |
-          python -m venv .venv
-          source .venv/bin/activate
-          pip install -r requirements-dev.txt
-          pytest
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+
+      - name: Install Node.js dependencies
+        run: npm ci
+
+      - name: Python tests
+        run: python -m pytest -q
 
       - name: TypeScript build
-        run: |
-          npm install
-          npm run build
+        run: npm run build
 
       - name: Prepare metrics
-        run: |
-          python tools/collect_metrics.py > metrics.json
+        run: python tools/collect_metrics.py > metrics.json
 
       - name: Compute Score Function
-        run: |
-          python -m score_function score-function.yml metrics.json | tee out.json
+        run: python -m score_function score-function.yml metrics.json | tee out.json
 
       - name: Gate PR
         run: |
