@@ -79,7 +79,7 @@ import { scoreFunction, DEFAULT_CONFIG } from "./tools/score_function";
 const result = scoreFunction(DEFAULT_CONFIG, metrics);
 ```
 
-- HTTP API で公開する場合は自前のアプリ／サーバレス環境からこのモジュールを呼び出してください（以前の Vercel / Cloudflare 向けサンプルは撤去済み）。
+- HTTP API で公開する場合は自前のアプリ／サーバレス環境からこのモジュールを呼び出してください。
 
 ### 4. CI への組み込み
 
